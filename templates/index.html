@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  <title>RMFWSA - Home</title>
+  
+  
+  <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'>
+
+  <style>
+  .table {
+   margin: auto;
+   width: 50% !important; 
+}
+  </style>
+  
+  
+</head>
+
+<body>
+
+  <h3 align='center'>Today's Mess Menu</h3>
+  <br><br><br>
+<div class="container">
+  <ul id="myTabs" class="nav nav-pills nav-justified" role="tablist" data-tabs="tabs">
+    <li class="active"><a href="#Breakfast" data-toggle="tab">Breakfast</a></li>
+    <li><a href="#Lunch" data-toggle="tab">Lunch</a></li>
+    <li><a href="#Snacks" data-toggle="tab">Snacks</a></li>
+    <li><a href="#Dinner" data-toggle="tab">Dinner</a></li>
+  </ul>
+  <div class="tab-content">
+    <div role="tabpanel" class="tab-pane fade in active" id="Breakfast">
+
+        <table class="table table-bordered table-striped text-center">
+            {%for item in breakfastItems%}          
+              <tr>
+                  <td>{{item}}</td> 
+              </tr>
+              {% endfor %}
+</table>
+
+	</div>
+    
+  
+      <div role="tabpanel" class="tab-pane fade in active" id="Lunch">
+  
+          <table class="table table-bordered table-striped text-center">
+              {%for item in lunchItems%}          
+                <tr>
+                    <td>{{item}}</td> 
+                </tr>
+                {% endfor %}
+  </table>
+  
+    </div>
+
+    
+        <div role="tabpanel" class="tab-pane fade in active" id="Snacks">
+    
+            <table class="table table-bordered table-striped text-center">
+                {%for item in snacksItems%}          
+                  <tr>
+                      <td>{{item}}</td> 
+                  </tr>
+                  {% endfor %}
+    </table>
+    
+      </div>
+
+      
+          <div role="tabpanel" class="tab-pane fade in active" id="Dinner">
+      
+              <table class="table table-bordered table-striped text-center">
+                  {%for item in dinnerItems%}          
+                    <tr>
+                        <td>{{item}}</td> 
+                    </tr>
+                    {% endfor %}
+      </table>
+      
+        </div>
+
+  </div>
+</div>
+
+<br><br><br>
+
+<center><a class="btn btn-primary" href="signin/" role="button">SignIn To Rate Your Food</a></center>
+
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
+
+  
+
+</body>
+
+</html>

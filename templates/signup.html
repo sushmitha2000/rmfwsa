@@ -1,0 +1,31 @@
+{% if msg %}
+<script>
+    alert('{{msg}}');
+</script>
+{% endif %}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Signup</title>
+  </head>
+  <body>
+<form action="/postsignup/" method="post">
+  <!-- don't use postsignup/ otherwise will redirect to signup/postsignup -->
+  {% csrf_token %}
+
+  Username:
+  <input type="text" name="name" placeholder="Username">
+  <br><br>
+  Email:
+  <input type="email" name="email" placeholder="Email">
+  <br><br>
+  Password:
+  <input type="password" name="pass" placeholder="Password">
+  <br><br>
+
+  <input type="submit" value="SignUp">
+</form>
+  </body>
+</html>

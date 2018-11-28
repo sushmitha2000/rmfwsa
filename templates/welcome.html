@@ -1,0 +1,423 @@
+{% load static %}
+
+
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  <script src='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js'></script>
+
+
+  <script>
+   //GENERATE CSRF TOKEN
+function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie != '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+function csrfSafeMethod(method) {
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
+
+  </script>
+
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css'>
+  <style class="cp-pen-styles">@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+  
+  
+
+  fieldset, label { margin: 0; padding: 0; }
+  body{ margin: 20px; }
+  h1 { font-size: 1.5em; margin: 10px; }
+  
+  /****** Style Star Rating Widget *****/
+  
+  .rating { 
+    border: none;
+    float: left;
+  }
+  
+  .rating > input { display: none; } 
+  .rating > label:before { 
+    margin: 5px;
+    font-size: 1.25em;
+    font-family: FontAwesome;
+    display: inline-block;
+    content: "\f005";
+  }
+  
+  .rating > .half:before { 
+    content: "\f089";
+    position: absolute;
+  }
+  
+  .rating > label { 
+    color: #ddd; 
+   float: right; 
+  }
+  
+  /***** CSS Magic to Highlight Stars on Hover *****/
+  
+  .rating > input:checked ~ label, /* show gold star when clicked */
+  .rating:not(:checked) > label:hover, /* hover current star */
+  .rating:not(:checked) > label:hover ~ label { color: #FFD700;  } /* hover previous stars in list */
+  
+  .rating > input:checked + label:hover, /* hover current star when changing rating */
+  .rating > input:checked ~ label:hover,
+  .rating > label:hover ~ input:checked ~ label, /* lighten current selection */
+  .rating > input:checked ~ label:hover ~ label { color: #FFED85;  } 
+
+  .rating_selected {
+    color: #FFED85;
+    
+  }
+  </style>
+
+  <head>
+    <meta charset="utf-8">
+    <title>RMFWSA - Rate</title>
+
+    <style>
+      div{
+        position: absolute;
+        right: 10px;
+        top: 10px;
+      }
+    </style>
+
+</head>
+<body>
+  <center>
+  Welcome! {{e}}
+  <br><br><br>
+
+   <h2>Breakfast</h2> 
+   <table>
+  {%for item in breakfastItems%} 
+
+    <tr>
+        <td>{{item}}</td>
+        <td>
+            
+            <fieldset id="{{item}}_field" class="rating">
+                <input type="radio" id="star5_{{item}}" name="rating_{{item}}" value="5"><label class = "full" for="star5_{{item}}" title="Awesome - 5 stars"></label>
+                <input type="radio" id="star4half_{{item}}" name="rating_{{item}}" value="4.5"><label class="half" for="star4half_{{item}}" title="Pretty good - 4.5 stars"></label>
+                <input type="radio" id="star4_{{item}}" name="rating_{{item}}" value="4"><label class = "full" for="star4_{{item}}" title="Pretty good - 4 stars"></label>
+                <input type="radio" id="star3half_{{item}}" name="rating_{{item}}" value="3.5"><label class="half" for="star3half_{{item}}" title="Meh - 3.5 stars"></label>
+                <input type="radio" id="star3_{{item}}" name="rating_{{item}}" value="3"><label class = "full" for="star3_{{item}}" title="Meh - 3 stars"></label>
+                <input type="radio" id="star2half_{{item}}" name="rating_{{item}}" value="2.5"><label class="half" for="star2half_{{item}}" title="Kinda bad - 2.5 stars"></label>
+                <input type="radio" id="star2_{{item}}" name="rating_{{item}}" value="2"><label class = "full" for="star2_{{item}}" title="Kinda bad - 2 stars"></label>
+                <input type="radio" id="star1half_{{item}}" name="rating_{{item}}" value="1.5"><label class="half" for="star1half_{{item}}" title="Meh - 1.5 stars"></label>
+                <input type="radio" id="star1_{{item}}" name="rating_{{item}}" value="1"><label class = "full" for="star1_{{item}}" title="Sucks big time - 1 star"></label>
+                <input type="radio" id="starhalf_{{item}}" name="rating_{{item}}" value="0.5"><label class="half" for="starhalf_{{item}}" title="Sucks big time - 0.5 stars"></label>
+            </fieldset>
+        </td>    
+    </tr>
+
+
+    <script type="text/javascript">
+      $('#{{item}}_field input').on('change', function() {
+        var rating = $(this).val()
+
+        var i = 0;
+        $(this).each(function(index){
+             $(this).removeClass("rating_selected")
+        })
+           
+         $(this).each(function(index){
+            if(i++ < rating*2)
+             $(this).addClass("rating_selected")
+             $(this).children().addClass("rating_selected")
+        })
+      
+        var item = '{{item}}'
+      console.log($(this).val());
+      
+          
+      var csrftoken = getCookie('csrftoken');   
+      $.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+    
+      var data = {
+          
+          "csrfmiddlewaretoken": csrftoken,
+          "item": item,
+          "rating": rating
+
+      }
+      console.log(data)
+      $.ajax({
+          type: 'POST',
+          url: '/postrating/',
+          data: JSON.stringify(data),
+          success: function (data) {
+              console.log(data)
+          },
+          error: function (data) {
+              alert("500 ERROR");
+          }
+      });
+
+        });  
+  </script>
+
+      {% endfor %}
+</table>
+
+  <h2>Lunch</h2> 
+  <table>
+      {%for item in lunchItems%}
+      <tr>
+          <td>{{item}}</td>
+          <td>
+              
+              <fieldset id="{{item}}_field" class="rating">
+                  <input type="radio" id="star5_{{item}}" name="rating_{{item}}" value="5"><label class = "full" for="star5_{{item}}" title="Awesome - 5 stars"></label>
+                  <input type="radio" id="star4half_{{item}}" name="rating_{{item}}" value="4.5"><label class="half" for="star4half_{{item}}" title="Pretty good - 4.5 stars"></label>
+                  <input type="radio" id="star4_{{item}}" name="rating_{{item}}" value="4"><label class = "full" for="star4_{{item}}" title="Pretty good - 4 stars"></label>
+                  <input type="radio" id="star3half_{{item}}" name="rating_{{item}}" value="3.5"><label class="half" for="star3half_{{item}}" title="Meh - 3.5 stars"></label>
+                  <input type="radio" id="star3_{{item}}" name="rating_{{item}}" value="3"><label class = "full" for="star3_{{item}}" title="Meh - 3 stars"></label>
+                  <input type="radio" id="star2half_{{item}}" name="rating_{{item}}" value="2.5"><label class="half" for="star2half_{{item}}" title="Kinda bad - 2.5 stars"></label>
+                  <input type="radio" id="star2_{{item}}" name="rating_{{item}}" value="2"><label class = "full" for="star2_{{item}}" title="Kinda bad - 2 stars"></label>
+                  <input type="radio" id="star1half_{{item}}" name="rating_{{item}}" value="1.5"><label class="half" for="star1half_{{item}}" title="Meh - 1.5 stars"></label>
+                  <input type="radio" id="star1_{{item}}" name="rating_{{item}}" value="1"><label class = "full" for="star1_{{item}}" title="Sucks big time - 1 star"></label>
+                  <input type="radio" id="starhalf_{{item}}" name="rating_{{item}}" value="0.5"><label class="half" for="starhalf_{{item}}" title="Sucks big time - 0.5 stars"></label>
+              </fieldset>
+          </td>    
+      </tr>
+  
+  
+      <script type="text/javascript">
+        $('#{{item}}_field input').on('change', function() {
+          var rating = $(this).val()
+  
+          var i = 0;
+          $(this).each(function(index){
+               $(this).removeClass("rating_selected")
+          })
+             
+           $(this).each(function(index){
+              if(i++ < rating*2)
+               $(this).addClass("rating_selected")
+               $(this).children().addClass("rating_selected")
+          })
+        
+        $('#paramsSent').html(rating);
+        var item = '{{item}}'
+        console.log($(this).val());
+        
+            
+        var csrftoken = getCookie('csrftoken');   
+        $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          }
+      }
+  });
+      
+        var data = {
+            
+            "csrfmiddlewaretoken": csrftoken,
+            "item": item,
+            "rating": rating
+  
+        }
+        console.log(data)
+        $.ajax({
+            type: 'POST',
+            url: '/postrating/',
+            data: JSON.stringify(data),
+            success: function (data) {
+                console.log(data)
+            },
+            error: function (data) {
+                alert("500 ERROR");
+            }
+        });
+  
+          });  
+    </script>
+  
+        {% endfor %}
+  </table>
+
+  <h2>Snacks</h2> 
+  <table>
+      {%for item in snacksItems%}
+      <tr>
+          <td>{{item}}</td>
+          <td>
+              
+              <fieldset id="{{item}}_field" class="rating">
+                  <input type="radio" id="star5_{{item}}" name="rating_{{item}}" value="5"><label class = "full" for="star5_{{item}}" title="Awesome - 5 stars"></label>
+                  <input type="radio" id="star4half_{{item}}" name="rating_{{item}}" value="4.5"><label class="half" for="star4half_{{item}}" title="Pretty good - 4.5 stars"></label>
+                  <input type="radio" id="star4_{{item}}" name="rating_{{item}}" value="4"><label class = "full" for="star4_{{item}}" title="Pretty good - 4 stars"></label>
+                  <input type="radio" id="star3half_{{item}}" name="rating_{{item}}" value="3.5"><label class="half" for="star3half_{{item}}" title="Meh - 3.5 stars"></label>
+                  <input type="radio" id="star3_{{item}}" name="rating_{{item}}" value="3"><label class = "full" for="star3_{{item}}" title="Meh - 3 stars"></label>
+                  <input type="radio" id="star2half_{{item}}" name="rating_{{item}}" value="2.5"><label class="half" for="star2half_{{item}}" title="Kinda bad - 2.5 stars"></label>
+                  <input type="radio" id="star2_{{item}}" name="rating_{{item}}" value="2"><label class = "full" for="star2_{{item}}" title="Kinda bad - 2 stars"></label>
+                  <input type="radio" id="star1half_{{item}}" name="rating_{{item}}" value="1.5"><label class="half" for="star1half_{{item}}" title="Meh - 1.5 stars"></label>
+                  <input type="radio" id="star1_{{item}}" name="rating_{{item}}" value="1"><label class = "full" for="star1_{{item}}" title="Sucks big time - 1 star"></label>
+                  <input type="radio" id="starhalf_{{item}}" name="rating_{{item}}" value="0.5"><label class="half" for="starhalf_{{item}}" title="Sucks big time - 0.5 stars"></label>
+              </fieldset>
+          </td>    
+      </tr>
+  
+  
+      <script type="text/javascript">
+        $('#{{item}}_field input').on('change', function() {
+          var rating = $(this).val()
+  
+          var i = 0;
+          $(this).each(function(index){
+               $(this).removeClass("rating_selected")
+          })
+             
+           $(this).each(function(index){
+              if(i++ < rating*2)
+               $(this).addClass("rating_selected")
+               $(this).children().addClass("rating_selected")
+          })
+        
+        $('#paramsSent').html(rating);
+        var item = '{{item}}'
+        console.log($(this).val());
+        
+            
+        var csrftoken = getCookie('csrftoken');   
+        $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          }
+      }
+  });
+      
+        var data = {
+            
+            "csrfmiddlewaretoken": csrftoken,
+            "item": item,
+            "rating": rating
+  
+        }
+        console.log(data)
+        $.ajax({
+            type: 'POST',
+            url: '/postrating/',
+            data: JSON.stringify(data),
+            success: function (data) {
+                console.log(data)
+            },
+            error: function (data) {
+                alert("500 ERROR");
+            }
+        });
+  
+          });  
+    </script>
+  
+        {% endfor %}
+  </table>
+
+  <h2>Dinner</h2> 
+  <table>
+      {%for item in dinnerItems%}
+      <tr>
+          <td>{{item}}</td>
+          <td>
+              
+              <fieldset id="{{item}}_field" class="rating">
+                  <input type="radio" id="star5_{{item}}" name="rating_{{item}}" value="5"><label class = "full" for="star5_{{item}}" title="Awesome - 5 stars"></label>
+                  <input type="radio" id="star4half_{{item}}" name="rating_{{item}}" value="4.5"><label class="half" for="star4half_{{item}}" title="Pretty good - 4.5 stars"></label>
+                  <input type="radio" id="star4_{{item}}" name="rating_{{item}}" value="4"><label class = "full" for="star4_{{item}}" title="Pretty good - 4 stars"></label>
+                  <input type="radio" id="star3half_{{item}}" name="rating_{{item}}" value="3.5"><label class="half" for="star3half_{{item}}" title="Meh - 3.5 stars"></label>
+                  <input type="radio" id="star3_{{item}}" name="rating_{{item}}" value="3"><label class = "full" for="star3_{{item}}" title="Meh - 3 stars"></label>
+                  <input type="radio" id="star2half_{{item}}" name="rating_{{item}}" value="2.5"><label class="half" for="star2half_{{item}}" title="Kinda bad - 2.5 stars"></label>
+                  <input type="radio" id="star2_{{item}}" name="rating_{{item}}" value="2"><label class = "full" for="star2_{{item}}" title="Kinda bad - 2 stars"></label>
+                  <input type="radio" id="star1half_{{item}}" name="rating_{{item}}" value="1.5"><label class="half" for="star1half_{{item}}" title="Meh - 1.5 stars"></label>
+                  <input type="radio" id="star1_{{item}}" name="rating_{{item}}" value="1"><label class = "full" for="star1_{{item}}" title="Sucks big time - 1 star"></label>
+                  <input type="radio" id="starhalf_{{item}}" name="rating_{{item}}" value="0.5"><label class="half" for="starhalf_{{item}}" title="Sucks big time - 0.5 stars"></label>
+              </fieldset>
+          </td>    
+      </tr>
+  
+  
+      <script type="text/javascript">
+        $('#{{item}}_field input').on('change', function() {
+          var rating = $(this).val()
+  
+          var i = 0;
+          $(this).each(function(index){
+               $(this).removeClass("rating_selected")
+          })
+             
+           $(this).each(function(index){
+              if(i++ < rating*2)
+               $(this).addClass("rating_selected")
+               $(this).children().addClass("rating_selected")
+          })
+        
+        $('#paramsSent').html(rating);
+        var item = '{{item}}'
+        console.log($(this).val());
+        
+            
+        var csrftoken = getCookie('csrftoken');   
+        $.ajaxSetup({
+      beforeSend: function(xhr, settings) {
+          if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+              xhr.setRequestHeader("X-CSRFToken", csrftoken);
+          }
+      }
+  });
+      
+        var data = {
+            
+            "csrfmiddlewaretoken": csrftoken,
+            "item": item,
+            "rating": rating
+  
+        }
+        console.log(data)
+        $.ajax({
+            type: 'POST',
+            url: '/postrating/',
+            data: JSON.stringify(data),
+            success: function (data) {
+                console.log(data)
+            },
+            error: function (data) {
+                alert("500 ERROR");
+            }
+        });
+  
+          });  
+    </script>
+  
+        {% endfor %}
+  </table>
+</center>
+  <br><br><br>
+  <div>
+    <button type="button" class="btn btn-primary" onclick=" location.href = '{% url 'log' %}'"> Logout </button>
+    </div>
+
+</body>
+</html>
