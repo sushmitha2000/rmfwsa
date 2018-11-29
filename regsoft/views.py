@@ -2,6 +2,8 @@
 from django.shortcuts import render
 import pyrebase
 import datetime
+import requests
+import pytz
 from django.contrib import auth
 from django.http import HttpResponse
 from django.http import JsonResponse
@@ -24,60 +26,66 @@ config = {
 firebase = pyrebase.initialize_app(config)
 authorisation = firebase.auth()
 db = firebase.database() # gets the database
-# currentDate = datetime.datetime.now().strftime("%d/%m/%Y") 
-currentDate = "25/11/2018"
+currentDate = datetime.datetime.now().strftime("%d/%m/%Y") 
+dayofweek = datetime.datetime.today().strftime("%A")
+print(dayofweek)
+print(currentDate)
+
+
+def foodmenuAPIRequest():
+	loginUrl = 'http://118.185.138.207:8088/mobapi/login'
+	menuUrl = 'http://118.185.138.207:8088/mobapi/foodmenu'
+
+
+	headers = {
+	            'Host':'118.185.138.207:8088',
+	            'User-Agent': 'Mozilla/5.0 (compatible; Rigor/1.0.0; http://rigor.com)',
+	            'Content-Type': 'application/json',
+	            }
+
+	r = requests.post(loginUrl, data='==QfiAXYuVHV3IjMzMCb1FGUiojIkJ3b3N3chBnIsISM2MTMwRnI6ISZtFmbyV2c1Jye', headers = headers)
+	loginResponse=json.loads(r.text)
+	refreshtoken = loginResponse['refreshtoken']
+
+	r1 = requests.post(menuUrl, data=refreshtoken, headers = headers)
+	menuResponse=json.loads(r1.text)
+	days = {'Mon':'Monday','Tue':'Tuesday','Wed':'Wednesday','Thu':'Thursday','Fri':'Friday','Sat':'Saturday','Sun':'Sunday'}
+	vald = {'B':'breakfast', 'D':'dinner','L':'lunch'}
+	lst = []
+	dct = {}
+	for i in menuResponse:
+	   lst.append([days[i['MENUDAY']],{vald[i['MENUTYPE']]:i['MENU'].split('$')}])
+	for i in lst:
+	    dct[i[0]] = dct.get(i[0],[])
+	    dct[i[0]] = dct[i[0]] + [i[1]] 
+	return dct
 
 def getbreakfastItems():
    
-    breakfast = db.child("breakfast").get().val()
-    breakfastItems=[]
+    breakfastItems = foodmenuAPIRequest()
+    breakfastItems = breakfastItems[dayofweek][0]['breakfast']
 
-    for bkey in breakfast:
-        dbDate = db.child("breakfast").child(bkey).child("date").child(1).get().val()     
-        
-        if dbDate == currentDate:
-            breakfastItems = db.child("breakfast").child(bkey).child("items").get().val()
-    breakfastItems = [slugify(item) for item in breakfastItems]
     return breakfastItems
 
 def getlunchItems():
    
-    lunch = db.child("lunch").get().val()
-    lunchItems=[]
+    lunchItems = foodmenuAPIRequest()
+    lunchItems = lunchItems[dayofweek][2]['lunch']
 
-    for lkey in lunch:
-        dbDate = db.child("lunch").child(lkey).child("date").child(1).get().val()     
-        
-        if dbDate == currentDate:
-            lunchItems = db.child("lunch").child(lkey).child("items").get().val()
-    lunchItems = [slugify(item) for item in lunchItems]
     return lunchItems
 
-def getsnacksItems():
+# def getsnacksItems():
    
-    snacks = db.child("snacks").get().val()
-    snacksItems=[]
+#     snacksItems = foodmenuAPIRequest()
+#     snacksItems = snacksItems[dayofweek][3]['snacks']
 
-    for skey in snacks:
-        dbDate = db.child("snacks").child(skey).child("date").child(1).get().val()     
-        
-        if dbDate == currentDate:
-            snacksItems = db.child("snacks").child(skey).child("items").get().val()
-    
-    snacksItems = [slugify(item) for item in snacksItems]
-    return snacksItems
+#     return snacksItems
 
 def getdinnerItems():
    
-    dinner = db.child("dinner").get().val()
-    dinnerItems=[]
+    dinnerItems = foodmenuAPIRequest()
+    dinnerItems = dinnerItems[dayofweek][1]['dinner']
 
-    for dkey in dinner:
-        dbDate = db.child("dinner").child(dkey).child("date").child(1).get().val()     
-        
-        if dbDate == currentDate:
-            dinnerItems = db.child("dinner").child(dkey).child("items").get().val()
-    dinnerItems = [slugify(item) for item in dinnerItems]
     return dinnerItems
 
 
@@ -114,10 +122,10 @@ def index(request):
 
     breakfastItems = getbreakfastItems()
     lunchItems = getlunchItems()
-    snacksItems = getsnacksItems()
+    # snacksItems = getsnacksItems()
     dinnerItems = getdinnerItems()
     
-    return render(request, 'index.html', {'breakfastItems':breakfastItems, 'lunchItems':lunchItems, 'snacksItems':snacksItems, 'dinnerItems':dinnerItems})
+    return render(request, 'index.html', {'breakfastItems':breakfastItems, 'lunchItems':lunchItems, 'dinnerItems':dinnerItems})
 
 
 def postsign(request):
@@ -138,10 +146,14 @@ def postsign(request):
 
     breakfastItems = getbreakfastItems()
     lunchItems = getlunchItems()
-    snacksItems = getsnacksItems()
+    # snacksItems = getsnacksItems()
     dinnerItems = getdinnerItems()
+    breakfastItems = [slugify(item) for item in breakfastItems]
+    lunchItems = [slugify(item) for item in lunchItems]
+    # snacksItems = [slugify(item) for item in snacksItems]
+    dinnerItems = [slugify(item) for item in dinnerItems]
 
-    return render(request,"welcome.html", {"e":email, 'breakfastItems':breakfastItems, 'lunchItems':lunchItems, 'snacksItems':snacksItems, 'dinnerItems':dinnerItems})
+    return render(request,"welcome.html", {"e":email, 'breakfastItems':breakfastItems, 'lunchItems':lunchItems, 'dinnerItems':dinnerItems})
 
 def logout(request):
     """logout from current user session, utilises auth from django.contrib [ensure db rules]"""
