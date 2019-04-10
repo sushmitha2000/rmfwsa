@@ -43,7 +43,7 @@ def foodmenuAPIRequest():
 	            'Content-Type': 'application/json',
 	            }
 
-	r = requests.post(loginUrl, data='==QfiAXYuVHV3IjMzMCb1FGUiojIkJ3b3N3chBnIsISM2MTMwRnI6ISZtFmbyV2c1Jye', headers = headers)
+	r = requests.post(loginUrl, data='BUAPI', headers = headers)
 	loginResponse=json.loads(r.text)
 	refreshtoken = loginResponse['refreshtoken']
 
